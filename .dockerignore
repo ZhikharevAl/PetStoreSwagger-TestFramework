@@ -1,0 +1,37 @@
+# Игнорировать директорию сборки
+build/
+
+# Игнорировать файлы IDE и системные файлы
+.idea/
+*.iml
+.vscode/
+*.swp
+.DS_Store
+
+# Игнорировать файлы Git
+.git/
+.gitignore
+
+# Игнорировать сам Dockerfile и .dockerignore
+Dockerfile
+.dockerignore
+
+# Игнорировать README и другие документационные файлы
+README.md
+
+# Игнорировать директорию gradle и связанные файлы
+.gradle/
+
+# Не игнорировать важные файлы сборки
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+
+# Игнорировать логи
+*.log
+
+# Игнорировать временные файлы
+*.tmp
+*.temp
+
+# Игнорировать файлы тестового покрытия
+*.exec
