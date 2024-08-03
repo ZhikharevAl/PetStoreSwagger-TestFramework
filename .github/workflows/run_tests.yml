@@ -1,0 +1,55 @@
+name: Run Tests and Publish Allure Report
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Compose
+        run: docker-compose -f docker-compose.yml up --build -d
+
+      - name: Run tests and generate Allure report
+        run: |
+          docker-compose exec app ./gradlew clean test
+          docker-compose exec app ./gradlew allureReport
+
+      - name: Upload Allure results
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: ./build/allure-results
+
+      - name: Get Allure history
+        uses: actions/checkout@v4
+        if: always()
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Move Allure results to gh-pages directory
+        run: |
+          mkdir -p gh-pages/allure-results
+          cp -R build/allure-results/* gh-pages/allure-results/
+
+      - name: Generate Allure report
+        uses: simple-elf/allure-report-action@v1.9
+        if: always()
+        with:
+          allure_results: gh-pages/allure-results
+          allure_history: gh-pages/allure-history
+          keep_reports: 20
+
+      - name: Deploy report to Github Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v4
+        env:
+          PERSONAL_TOKEN: ${{ secrets.GH_TOKEN }}
+          PUBLISH_BRANCH: gh-pages
+          PUBLISH_DIR: gh-pages/allure-history
