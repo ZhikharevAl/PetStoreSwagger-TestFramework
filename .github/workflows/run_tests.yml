@@ -8,18 +8,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and run tests with Docker Compose
+      - name: Install Docker Compose
         run: |
-          docker-compose up --build --abort-on-container-exit
+          sudo apt-get update
+          sudo apt-get install -y docker-compose-plugin
+          docker compose version
+
+      - name: Build and run tests with Docker Compose
+        run: docker compose up --build --abort-on-container-exit
 
       - name: Copy Allure results
         run: |
-          docker cp $(docker-compose ps -q app):/app/build/allure-results ./allure-results
+          container_id=$(docker compose ps -q app)
+          docker cp ${container_id}:/app/build/allure-results ./allure-results
 
       - name: Generate Allure Report
         uses: simple-elf/allure-report-action@master
