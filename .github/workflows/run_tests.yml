@@ -26,9 +26,6 @@ jobs:
         run: ./gradlew test
         continue-on-error: true
 
-      - name: Generate Allure Report
-        run: ./gradlew allureReport
-        if: always()
 
       - name: Upload Allure results
         uses: actions/upload-artifact@master
@@ -60,6 +57,3 @@ jobs:
           PERSONAL_TOKEN: ${{ secrets.GT }}
           PUBLISH_BRANCH: gh-pages
           PUBLISH_DIR: allure-history
-
-permissions:
-  contents: write
