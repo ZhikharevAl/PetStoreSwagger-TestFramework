@@ -1,61 +1,41 @@
-name: Run Tests and Publish Allure Report
+name: CI with Docker Compose and Allure (Manual Trigger)
 
 on:
   workflow_dispatch:
 
 jobs:
-  build:
+  test-and-report:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Docker
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and run tests with Docker Compose
         run: |
-          sudo apt-get update
-          sudo apt-get install -y docker-compose
+          docker-compose up --build --abort-on-container-exit
 
-      - name: Build Docker image
-        run: docker-compose -f docker-compose.yml up --build -d
-
-      - name: Run tests and generate Allure report
+      - name: Copy Allure results
         run: |
-          docker-compose exec app ./gradlew clean test
-          docker-compose exec app ./gradlew allureReport
+          docker cp $(docker-compose ps -q app):/app/build/allure-results ./allure-results
 
-      - name: Upload Allure results
-        uses: actions/upload-artifact@v4
-        with:
-          name: allure-results
-          path: ./build/allure-results
-
-      - name: Get Allure history
-        uses: actions/checkout@v4
-        if: always()
-        continue-on-error: true
-        with:
-          ref: gh-pages
-          path: gh-pages
-
-      - name: Move Allure results to gh-pages directory
-        run: |
-          mkdir -p gh-pages/allure-results
-          cp -R build/allure-results/* gh-pages/allure-results/
-
-      - name: Generate Allure report
-        uses: simple-elf/allure-report-action@v1.9
+      - name: Generate Allure Report
+        uses: simple-elf/allure-report-action@master
         if: always()
         with:
-          allure_results: gh-pages/allure-results
-          allure_history: gh-pages/allure-history
-          keep_reports: 20
+          allure_results: allure-results
+          allure_report: allure-report
+          gh_pages: gh-pages
+          allure_history: allure-history
 
       - name: Deploy report to Github Pages
         if: always()
         uses: peaceiris/actions-gh-pages@v4
-        env:
-          PERSONAL_TOKEN: ${{ secrets.GH_TOKEN_PAGE }}
-          PUBLISH_BRANCH: gh-pages
-          PUBLISH_DIR: gh-pages/allure-history
+        with:
+          github_token: ${{ secrets.GH_TOKEN_PAGES }}
+          publish_dir: ./allure-history
 
+permissions:
+  contents: write
