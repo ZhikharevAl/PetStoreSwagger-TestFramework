@@ -35,7 +35,7 @@ jobs:
         if: always()
         with:
           name: allure-results
-          path: build/reports/allure-report/allureReport
+          path: /home/runner/work/PetStoreSwagger-TestFramework/PetStoreSwagger-TestFramework/build/reports/allure-report/allureReport
 
       - name: Get Allure history
         uses: actions/checkout@v4.1.7
