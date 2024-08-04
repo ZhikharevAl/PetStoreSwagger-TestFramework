@@ -23,8 +23,11 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run tests with Gradle
-        run: ./gradlew clean test --warning-mode all
+        run: ./gradlew clean test
         continue-on-error: true
+
+      - name: Generate Allure Report
+        run: ./gradlew allureReport
 
       - name: Upload Allure results
         uses: actions/upload-artifact@master
