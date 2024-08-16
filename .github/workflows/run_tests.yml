@@ -35,7 +35,7 @@ jobs:
         if: always()
         with:
           name: allure-results
-          path: /home/runner/work/PetStoreSwagger-TestFramework/PetStoreSwagger-TestFramework/build/reports/allure-report/allureReport
+          path: build/reports/allure-report/allureReport
 
       - name: Get Allure history
         uses: actions/checkout@v4.1.7
@@ -55,7 +55,7 @@ jobs:
 
       - name: Deploy report to Github Pages
         if: always()
-        uses: peaceiris/actions-gh-pages@v2
+        uses: peaceiris/actions-gh-pages@v4
         env:
           PERSONAL_TOKEN: ${{ secrets.GT }}
           PUBLISH_BRANCH: gh-pages
